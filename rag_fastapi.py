@@ -7,15 +7,11 @@ from pypdf import PdfReader
 import re
 import warnings
 warnings.filterwarnings("ignore")
-# import json
 import logging
 import time
 import uuid
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI, HTTPException, Request
-# from fastapi.responses import JSONResponse
-
 
 PDF_PATH     = r"C:\Users\admin\PycharmProjects\AI_1\Knowledge_base_for_RAG.pdf"
 OLLAMA_MODEL = "llama3.2"
@@ -204,26 +200,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
-
-# Request/response timing middleware
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    req_id  = str(uuid.uuid4())[:8]
-    t_start = time.time()
-    api_logger.info(f"[{req_id}] --> {request.method} {request.url.path}")
-    response = await call_next(request)
-    elapsed  = round((time.time() - t_start) * 1000, 2)
-    api_logger.info(
-        f"[{req_id}] <-- {request.method} {request.url.path} "
-        f"| status={response.status_code} | {elapsed}ms"
-    )
-    return response
-
-# Health check
-@app.get("/health", summary="Health check")
-async def health():
-    api_logger.info("Health check endpoint called.")
-    return {"status": "ok", "model": OLLAMA_MODEL, "chunks_loaded": len(pipeline.chunks) if pipeline else 0}
 
 # Main endpoint
 @app.post("/ask", response_model=AnswerResponse, summary="Ask a question")
